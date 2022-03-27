@@ -1,12 +1,12 @@
-
+// ****************************** DESAFIO ENTREGABLE ANTERIOR
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 8080;
-const server = app.listen(PORT, () => {
-    console.log(`Listing in port ${server.address().port}`);
-});
-server.on('error', error => console.log(`Error in server ${error}`));
 
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, err => {
+    if (err) throw new Error(`Error en el servidor ${err}`)
+    console.error(`El servidor express esta escuchando en el puerto ${PORT}`)
+})
 
 const { Router } = express;
 const router = Router();
@@ -36,3 +36,36 @@ router.put('/:id', (req, res) => { res.json(container.updateById(req.params.id, 
 router.delete('/:id', (req, res) => {  res.json(container.deleteById(req.params.id))   })
 
 app.use('/api/products', router);
+
+// ****************************** DESAFIO ENTREGABLE 10
+
+const handlebars = require('express-handlebars');
+const hbs = handlebars.create({
+    extname: '.hbs',
+    defaultLayout: 'index.hbs',
+    layoutsDir: __dirname + '/views/layouts',
+    partialsDir: __dirname + '/views/partials',
+
+    helpers: {
+        isEmpity: function(products){   
+            if(products.length===0){
+                return "<tr> <td colspan='3'> Not products found </td> </tr>"
+            }
+        }
+    }
+});
+
+app.engine('hbs', hbs.engine)
+
+app.set('views', './views');
+app.set('view engine', 'hbs');
+
+app.get('/products', (req, res) => {
+    res.render('main', {products: container.getAll()});
+})
+
+app.post('/products', (req, res) => {
+        container.save(req.body)
+        res.redirect('/static');  
+})
+
